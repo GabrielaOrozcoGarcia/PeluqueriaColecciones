@@ -282,4 +282,69 @@ public class GestorPeluqueria {
                 .forEach(e -> System.out.println("    " + e.getKey()
                         + " -> " + e.getValue().getNombreCliente()));
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 12. CANCELAR — Map.get() + removeIf() en Queue
+    // No se elimina de List ni de Map: queda como evidencia
+    // ─────────────────────────────────────────────────────────────────────────
+    public void cancelar(String turno) throws Exception {
+        ClienteServicio cliente = indicePorTurno.get(turno.toUpperCase());
+        if (cliente == null) {
+            throw new IllegalArgumentException(
+                    "No existe cliente con turno " + turno);
+        }
+        if (!cliente.getEstado().equalsIgnoreCase("PENDIENTE")) {
+            throw new IllegalStateException(
+                    "Solo se pueden cancelar clientes PENDIENTES. Estado actual: "
+                            + cliente.getEstado());
+        }
+        cliente.setEstado("CANCELADO");
+        pendientes.removeIf(c -> c.getNumeroTurno().equalsIgnoreCase(turno));
+        System.out.println("\n  OK Cancelado: " + cliente);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 13. DESHACER — Deque.pop() + Queue.offer()
+    // El cliente vuelve a la cola con estado PENDIENTE
+    // ─────────────────────────────────────────────────────────────────────────
+    public void deshacer() throws Exception {
+        if (historial.isEmpty()) {
+            throw new IllegalStateException("No hay operaciones para deshacer.");
+        }
+        ClienteServicio ultimo = historial.pop();
+        ultimo.setEstado("PENDIENTE");
+        pendientes.offer(ultimo);
+        System.out.println("\n  OK Deshecho. Cliente devuelto a la cola:");
+        System.out.println("  " + ultimo);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 14. VER CANTIDADES — size() de cada coleccion + Stream map() para turnos
+    // ─────────────────────────────────────────────────────────────────────────
+    public void verCantidades() {
+        System.out.println("\n  === CANTIDADES ===");
+        System.out.println("  List  elementos.size()       : " + elementos.size());
+        System.out.println("  Queue pendientes.size()      : " + pendientes.size());
+        System.out.println("  Deque historial.size()       : " + historial.size());
+        System.out.println("  Map   indicePorTurno.size()  : " + indicePorTurno.size());
+
+        // Stream map() para extraer solo los turnos
+        List<String> turnos = elementos.stream()
+                .map(ClienteServicio::getNumeroTurno)
+                .toList();
+        System.out.println("  Turnos (Stream.map): " + turnos);
+
+        // Stream groupingBy + counting por estado
+        Map<String, Long> conteo = elementos.stream()
+                .collect(Collectors.groupingBy(
+                        ClienteServicio::getEstado, Collectors.counting()));
+        conteo.forEach((e, t) ->
+                System.out.println("  Stream conteo " + e + ": " + t));
+
+        // Map.keySet() y Map.values()
+        System.out.println("  Map.keySet()  : " + indicePorTurno.keySet());
+        System.out.println("  Map.values()  : "
+                + indicePorTurno.values().stream()
+                .map(ClienteServicio::getNombreCliente).toList());
+    }
 }
