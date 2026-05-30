@@ -26,6 +26,9 @@ public class GestorPeluqueria {
     // Deque: historial LIFO — push() apila, pop() desapila desde la cima
     private final Deque<ClienteServicio> historial = new ArrayDeque<>();
 
+    // Map: indice para busqueda O(1) por numero de turno
+    private final Map<String, ClienteServicio> indicePorTurno = new HashMap<>();
+
 
     // ─────────────────────────────────────────────────────────────────────────
     // 1. REGISTRAR
