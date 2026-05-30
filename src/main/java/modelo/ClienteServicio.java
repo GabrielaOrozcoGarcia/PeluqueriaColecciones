@@ -71,5 +71,14 @@ public class ClienteServicio {
     public void setCategoria(String categoria) {
         this.categoria = categoria;
     }
-    
+
+    // ── toString ─────────────────────────────────────────────────────────────
+    @Override
+    public String toString() {
+        return "Turno: "     + numeroTurno
+                + " | Cliente: " + nombreCliente
+                + " | Servicio: " + tipoServicio
+                + " | Categoria: " + categoria
+                + " | Estado: "  + estado;
+    }
 }
