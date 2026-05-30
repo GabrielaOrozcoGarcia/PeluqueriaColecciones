@@ -11,6 +11,7 @@ import java.util.stream.*;
  * Colecciones usadas:
  *   List<ClienteServicio>           → registro general de todos los clientes
  *   Queue<ClienteServicio>          → pendientes FIFO (LinkedList)
+ *   Deque<ClienteServicio>          → historial LIFO tipo pila (ArrayDeque)
  *
  * @author Gabriela Orozco Garcia
  */
@@ -21,6 +22,9 @@ public class GestorPeluqueria {
 
     // Queue: cola de pendientes FIFO — offer() al final, poll() desde el frente
     private final Queue<ClienteServicio> pendientes = new LinkedList<>();
+
+    // Deque: historial LIFO — push() apila, pop() desapila desde la cima
+    private final Deque<ClienteServicio> historial = new ArrayDeque<>();
 
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -71,5 +75,31 @@ public class GestorPeluqueria {
         System.out.println("  Siguiente (peek): " + pendientes.peek());
         System.out.println("  ---");
         pendientes.forEach(c -> System.out.println("  " + c));
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 4. PROCESAR SIGUIENTE
+    // Queue.poll() — FIFO: saca del frente
+    // Deque.push() — LIFO: apila en la cima del historial
+    // ─────────────────────────────────────────────────────────────────────────
+    public void procesarSiguiente() throws Exception {
+        ClienteServicio procesado = pendientes.poll();
+        if (procesado == null) {
+            throw new IllegalStateException("No hay clientes pendientes para procesar.");
+        }
+        procesado.setEstado("PROCESADO");
+        historial.push(procesado);
+        System.out.println("\n  OK Cliente atendido: " + procesado);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 5. VER HISTORIAL — Deque con peek(), size(), forEach()
+    // ─────────────────────────────────────────────────────────────────────────
+    public void verHistorial() {
+        System.out.println("\n  === HISTORIAL — Deque (" + historial.size() + ") ===");
+        if (historial.isEmpty()) { System.out.println("  [Historial vacio]"); return; }
+        System.out.println("  Ultimo atendido (peek): " + historial.peek());
+        System.out.println("  ---");
+        historial.forEach(c -> System.out.println("  " + c));
     }
 }
