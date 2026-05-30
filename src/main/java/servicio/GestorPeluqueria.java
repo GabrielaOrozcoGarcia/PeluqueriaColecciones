@@ -105,4 +105,97 @@ public class GestorPeluqueria {
         System.out.println("  ---");
         historial.forEach(c -> System.out.println("  " + c));
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 6. BUSCAR POR TURNO — Map.get() O(1)
+    // ─────────────────────────────────────────────────────────────────────────
+    public void buscarPorTurno(String turno) throws Exception {
+        if (!indicePorTurno.containsKey(turno.toUpperCase())) {
+            throw new IllegalArgumentException(
+                    "No existe cliente con turno " + turno);
+        }
+        ClienteServicio encontrado = indicePorTurno.get(turno.toUpperCase());
+        System.out.println("\n  OK Encontrado con Map.get():");
+        System.out.println("  " + encontrado);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 7. BUSCAR POR NOMBRE — Stream filter() + findFirst()
+    // ─────────────────────────────────────────────────────────────────────────
+    public void buscarPorNombre(String nombre) {
+        Optional<ClienteServicio> resultado = elementos.stream()
+                .filter(c -> c.getNombreCliente().equalsIgnoreCase(nombre))
+                .findFirst();
+
+        if (resultado.isPresent()) {
+            System.out.println("\n  OK Encontrado con Stream.filter().findFirst():");
+            System.out.println("  " + resultado.get());
+        } else {
+            System.out.println("\n  No se encontro cliente con nombre: " + nombre);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 8. FILTRAR — Stream filter() + toList()
+    // ─────────────────────────────────────────────────────────────────────────
+    public void filtrar(String criterio, String valor) {
+        List<ClienteServicio> filtrados;
+
+        if (criterio.equalsIgnoreCase("estado")) {
+            filtrados = elementos.stream()
+                    .filter(c -> c.getEstado().equalsIgnoreCase(valor))
+                    .toList();
+        } else {
+            filtrados = elementos.stream()
+                    .filter(c -> c.getCategoria().equalsIgnoreCase(valor))
+                    .toList();
+        }
+
+        System.out.println("\n  === FILTRO Stream.filter() — "
+                + criterio + " = " + valor + " (" + filtrados.size() + ") ===");
+        if (filtrados.isEmpty()) {
+            System.out.println("  [Sin resultados]");
+        } else {
+            filtrados.forEach(c -> System.out.println("  " + c));
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 9. ORDENAR — Stream sorted() + Comparator
+    // ─────────────────────────────────────────────────────────────────────────
+    public void ordenar(int criterio) {
+        List<ClienteServicio> ordenados;
+        String etiqueta;
+
+        switch (criterio) {
+            case 1 -> {
+                ordenados = elementos.stream()
+                        .sorted(Comparator.comparing(ClienteServicio::getNombreCliente))
+                        .toList();
+                etiqueta = "NOMBRE (A-Z)";
+            }
+            case 2 -> {
+                ordenados = elementos.stream()
+                        .sorted(Comparator.comparing(ClienteServicio::getNumeroTurno).reversed())
+                        .toList();
+                etiqueta = "TURNO descendente";
+            }
+            case 3 -> {
+                ordenados = elementos.stream()
+                        .sorted(Comparator.comparing(ClienteServicio::getCategoria))
+                        .toList();
+                etiqueta = "CATEGORIA (A-Z)";
+            }
+            default -> {
+                ordenados = elementos.stream()
+                        .sorted(Comparator.comparing(ClienteServicio::getNumeroTurno))
+                        .toList();
+                etiqueta = "TURNO ascendente";
+            }
+        }
+
+        System.out.println("\n  === ORDENADO Stream.sorted() — "
+                + etiqueta + " (" + ordenados.size() + ") ===");
+        ordenados.forEach(c -> System.out.println("  " + c));
+    }
 }
