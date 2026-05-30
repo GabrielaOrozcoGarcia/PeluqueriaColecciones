@@ -11,6 +11,9 @@ package modelo;
  *   - estado       : PENDIENTE | PROCESADO | CANCELADO
  *   - categoria    : CABELLO | BARBA | TRATAMIENTO
  *
+ *   equals() y hashCode() trabajan con numeroTurno (identificador principal).
+ *  * Esto es obligatorio para que las colecciones del SDK funcionen correctamente.
+ *
  * @author Gabriela Orozco Garcia
  */
 public class ClienteServicio {
@@ -80,5 +83,21 @@ public class ClienteServicio {
                 + " | Servicio: " + tipoServicio
                 + " | Categoria: " + categoria
                 + " | Estado: "  + estado;
+    }
+
+    // ── equals y hashCode por identificador principal: numeroTurno ────────────
+    // Las colecciones de Java (HashMap, LinkedList, removeIf, contains)
+    // dependen de estos metodos para comparar, buscar y evitar duplicados.
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        ClienteServicio otro = (ClienteServicio) obj;
+        return this.numeroTurno.equalsIgnoreCase(otro.numeroTurno);
+    }
+
+    @Override
+    public int hashCode() {
+        return numeroTurno.toLowerCase().hashCode();
     }
 }
