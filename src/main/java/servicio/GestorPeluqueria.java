@@ -198,4 +198,88 @@ public class GestorPeluqueria {
                 + etiqueta + " (" + ordenados.size() + ") ===");
         ordenados.forEach(c -> System.out.println("  " + c));
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 10. ESTADISTICAS — Stream + Collectors.groupingBy + counting + anyMatch
+    // ─────────────────────────────────────────────────────────────────────────
+    public void verEstadisticas() {
+        System.out.println("\n  === ESTADISTICAS — Stream + Map ===");
+
+        // groupingBy + counting: cantidad por estado
+        Map<String, Long> porEstado = elementos.stream()
+                .collect(Collectors.groupingBy(
+                        ClienteServicio::getEstado, Collectors.counting()));
+        System.out.println("  Cantidad por estado:");
+        porEstado.forEach((e, t) -> System.out.println("    " + e + ": " + t));
+
+        // groupingBy + counting: cantidad por categoria
+        Map<String, Long> porCategoria = elementos.stream()
+                .collect(Collectors.groupingBy(
+                        ClienteServicio::getCategoria, Collectors.counting()));
+        System.out.println("  Cantidad por categoria:");
+        porCategoria.forEach((c, t) -> System.out.println("    " + c + ": " + t));
+
+        // filter + count
+        long pendientesCount = elementos.stream()
+                .filter(c -> c.getEstado().equalsIgnoreCase("PENDIENTE")).count();
+        long procesadosCount = elementos.stream()
+                .filter(c -> c.getEstado().equalsIgnoreCase("PROCESADO")).count();
+        long canceladosCount = elementos.stream()
+                .filter(c -> c.getEstado().equalsIgnoreCase("CANCELADO")).count();
+
+        System.out.println("  Pendientes : " + pendientesCount);
+        System.out.println("  Procesados : " + procesadosCount);
+        System.out.println("  Cancelados : " + canceladosCount);
+        System.out.println("  Total      : " + elementos.size());
+
+        // anyMatch / allMatch / noneMatch
+        boolean hayPendientes = elementos.stream()
+                .anyMatch(c -> c.getEstado().equalsIgnoreCase("PENDIENTE"));
+        boolean todosTienenTurno = elementos.stream()
+                .allMatch(c -> c.getNumeroTurno() != null
+                        && !c.getNumeroTurno().isBlank());
+        boolean sinCancelados = elementos.stream()
+                .noneMatch(c -> c.getEstado().equalsIgnoreCase("CANCELADO"));
+
+        System.out.println("  anyMatch  - Hay pendientes     : " + hayPendientes);
+        System.out.println("  allMatch  - Todos tienen turno : " + todosTienenTurno);
+        System.out.println("  noneMatch - Sin cancelados     : " + sinCancelados);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 11. AGRUPAMIENTOS — Collectors.groupingBy + Collectors.toMap
+    // ─────────────────────────────────────────────────────────────────────────
+    public void verAgrupamientos() {
+        System.out.println("\n  === AGRUPAMIENTO POR CATEGORIA — Collectors.groupingBy ===");
+        Map<String, List<ClienteServicio>> porCategoria = elementos.stream()
+                .collect(Collectors.groupingBy(ClienteServicio::getCategoria));
+        porCategoria.forEach((cat, lista) -> {
+            System.out.println("  Categoria: " + cat + " (" + lista.size() + ")");
+            lista.forEach(c -> System.out.println("    " + c));
+        });
+
+        System.out.println("\n  === AGRUPAMIENTO POR ESTADO — Collectors.groupingBy ===");
+        Map<String, List<ClienteServicio>> porEstado = elementos.stream()
+                .collect(Collectors.groupingBy(ClienteServicio::getEstado));
+        porEstado.forEach((est, lista) -> {
+            System.out.println("  Estado: " + est + " (" + lista.size() + ")");
+            lista.forEach(c -> System.out.println("    " + c));
+        });
+
+        // Collectors.toMap: reconstruir indice desde la lista
+        Map<String, ClienteServicio> mapaReconstruido = elementos.stream()
+                .collect(Collectors.toMap(
+                        ClienteServicio::getNumeroTurno,
+                        c -> c,
+                        (existente, repetido) -> existente));
+        System.out.println("\n  Collectors.toMap — mapa reconstruido: "
+                + mapaReconstruido.size() + " entradas");
+
+        // Recorrer entradas del Map
+        System.out.println("  Map.entrySet():");
+        indicePorTurno.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(e -> System.out.println("    " + e.getKey()
+                        + " -> " + e.getValue().getNombreCliente()));
+    }
 }
